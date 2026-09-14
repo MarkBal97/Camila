@@ -196,6 +196,7 @@
                 </div>
             </div>
             <label for="boton1" class="boton" id="boton1">Pulsa aquí</label>
+    <audio id="musica-flores" src="https://raw.githubusercontent.com/MarkBal97/Camila/main/sparkle.mp3" preload="auto"></audio>
 
             <label for="small-gift-message" class="small-gift-message" id="small-gift-message">💌</label>
             <label for="texto-small-gift-message" class="texto-small-gift-message" id="texto-small-gift-message">Pulsa
@@ -208,5 +209,14 @@
         </div>
     </div>
 </body>
+    <script>
+        document.getElementById('boton1').addEventListener('change', function () {
+            if (this.checked) {
+                var audio = document.getElementById('musica-flores');
+                audio.currentTime = 0;
+                audio.play().catch(function () { });
+            }
+        });
+    </script>
 
 </html>

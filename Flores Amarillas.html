@@ -1,0 +1,641 @@
+<title>Flores Amarillas para Cam</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0..1&family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --night-deep:#160f26;
+    --night:#241834;
+    --night-soft:#33244a;
+    --dusk-horizon:#5c3a2c;
+    --marigold:#f2b705;
+    --marigold-soft:#ffd873;
+    --dusk-rose:#e8795a;
+    --cream:#f7ecd7;
+    --cream-dim:#cdbfa4;
+    --line: rgba(247,236,215,0.14);
+    --good:#8fce6a;
+  }
+
+  *{box-sizing:border-box;}
+  html{background:var(--night-deep);}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 0%, var(--night-soft) 0%, var(--night) 45%, var(--night-deep) 100%);
+    color:var(--cream);
+    font-family:'Jost', ui-sans-serif, system-ui, sans-serif;
+    font-weight:300;
+    padding:0 20px;
+    overflow-x:hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, 'Iowan Old Style', serif;
+    font-weight:500;
+    text-wrap:balance;
+    margin:0;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', ui-monospace, monospace;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--marigold-soft);
+    opacity:0.85;
+  }
+
+  #petal-canvas{
+    position:fixed;
+    inset:0;
+    width:100vw;
+    height:100vh;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  main{
+    position:relative;
+    z-index:1;
+    max-width:480px;
+    margin:0 auto;
+  }
+
+  /* ================= Game section ================= */
+  .game-section{
+    position:relative;
+    margin:0 -20px;
+    min-height:92vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:
+      linear-gradient(180deg,
+        var(--night-deep) 0%,
+        var(--night-soft) 38%,
+        var(--dusk-horizon) 78%,
+        #2c160f 100%);
+  }
+  #gameCanvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    touch-action:none;
+  }
+
+  .hud{
+    position:relative;
+    z-index:3;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 20px 0;
+    opacity:0;
+    transition:opacity .4s;
+    pointer-events:none;
+  }
+  .hud.show{ opacity:1; }
+  .hud .score{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.85rem;
+    letter-spacing:0.04em;
+    color:var(--cream);
+    font-variant-numeric: tabular-nums;
+    background:rgba(22,15,38,0.5);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:6px 14px;
+  }
+  .hud .score strong{ color:var(--marigold-soft); font-weight:500; }
+  .hud .goal-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.68rem;
+    color:var(--cream-dim);
+  }
+
+  .panel{
+    position:relative;
+    z-index:3;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:16px;
+    padding:24px;
+    pointer-events:none;
+  }
+  .panel > *{ pointer-events:auto; }
+  .panel[hidden]{ display:none !important; }
+
+  .panel h1{
+    font-size:clamp(2rem, 8.5vw, 2.6rem);
+    color:var(--cream);
+    line-height:1.1;
+    text-shadow:0 2px 18px rgba(22,15,38,0.6);
+  }
+  .panel h1 em{ font-style:italic; color:var(--marigold); }
+  .panel .sub{
+    font-size:0.98rem;
+    color:var(--cream-dim);
+    max-width:34ch;
+    line-height:1.6;
+  }
+
+  .btn{
+    font-family:'Jost', sans-serif;
+    font-size:0.95rem;
+    letter-spacing:0.02em;
+    color:#2b1f10;
+    background:linear-gradient(135deg, var(--marigold-soft), var(--marigold));
+    border:none;
+    border-radius:999px;
+    padding:14px 30px;
+    cursor:pointer;
+    box-shadow:0 8px 28px rgba(242,183,5,0.28);
+    transition:transform .2s ease;
+  }
+  .btn:active{ transform:scale(0.96); }
+  .btn:focus-visible{ outline:2px solid var(--cream); outline-offset:3px; }
+
+  .btn-ghost{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.7rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+    background:none;
+    border:none;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    cursor:pointer;
+    padding:8px;
+  }
+
+  .catch-toast{
+    position:absolute;
+    z-index:4;
+    transform:translate(-50%,-50%);
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:0.92rem;
+    color:var(--cream);
+    text-shadow:0 2px 10px rgba(22,15,38,0.8);
+    pointer-events:none;
+    animation: floatUp 1.1s ease forwards;
+    white-space:nowrap;
+  }
+  @keyframes floatUp{
+    0%{ opacity:0; transform:translate(-50%,-40%) scale(0.9); }
+    15%{ opacity:1; transform:translate(-50%,-70%) scale(1); }
+    100%{ opacity:0; transform:translate(-50%,-140%) scale(1); }
+  }
+
+  .won-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.7rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--good);
+  }
+
+  /* ================= Story ================= */
+  section{
+    padding-block:56px;
+    border-top:1px solid var(--line);
+  }
+  .game-section + .story{ border-top:none; }
+  .story p{
+    font-size:1.02rem;
+    line-height:1.75;
+    color:var(--cream);
+    max-width:62ch;
+    margin:16px 0 0;
+  }
+  .story p:first-of-type{ margin-top:20px; }
+
+  /* ================= Dedication ================= */
+  .dedication{ text-align:left; }
+  .dedication .to{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:1.5rem;
+    color:var(--marigold-soft);
+    margin-top:14px;
+  }
+  .dedication p{
+    font-size:1.05rem;
+    line-height:1.8;
+    margin:18px 0 0;
+  }
+  .dedication .signoff{
+    margin-top:28px;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:1.15rem;
+    color:var(--cream);
+  }
+
+  /* ================= Closing ================= */
+  .closing{
+    text-align:center;
+    padding-block:70px 90px;
+  }
+  .closing .final{
+    font-family:'Fraunces', serif;
+    font-size:clamp(1.5rem, 7vw, 2rem);
+    line-height:1.3;
+    color:var(--marigold-soft);
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity .8s ease, transform .8s ease;
+  }
+  .closing .final.show{ opacity:1; transform:translateY(0); }
+  .closing .stamp{
+    margin-top:22px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.7rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .catch-toast, .won-badge{ animation:none !important; }
+    .final{ transition:none !important; }
+  }
+</style>
+
+<canvas id="petal-canvas" aria-hidden="true"></canvas>
+
+<main>
+
+  <section class="game-section" id="gameSection">
+    <canvas id="gameCanvas" aria-label="Juego: atrapa los girasoles"></canvas>
+
+    <div class="hud" id="hud">
+      <div class="score"><strong id="scoreNum">0</strong> / 21 girasoles</div>
+      <div class="goal-note">21 de septiembre</div>
+    </div>
+
+    <div class="panel" id="panelStart">
+      <div class="eyebrow">un juego para ti</div>
+      <h1>Cosecha de<br><em>girasoles</em></h1>
+      <p class="sub">Van a subir girasoles desde el horizonte. Tócalos antes de que se pierdan en el cielo. Junta 21&mdash;uno por cada día hasta tu fecha&mdash;y se abrirá tu carta.</p>
+      <button class="btn" id="startBtn">Jugar</button>
+      <button class="btn-ghost" id="skipBtn">saltar el juego, ir directo a la carta</button>
+    </div>
+
+    <div class="panel" id="panelWon" hidden>
+      <div class="won-badge">21 / 21 — lo lograste</div>
+      <h1>Un girasol<br>por cada día</h1>
+      <p class="sub">Como el camino hasta el 21 de septiembre: uno a la vez, y ya casi llegamos.</p>
+      <button class="btn" id="openLetterBtn">Abrir tu carta</button>
+    </div>
+  </section>
+
+  <section class="story">
+    <div class="eyebrow">La leyenda</div>
+    <h2>Una lluvia de flores amarillas</h2>
+    <p>Cuenta la tradición, nacida de las páginas de Gabriel García Márquez, que cuando el patriarca de Macondo murió, del cielo cayó una lluvia silenciosa de flores amarillas que cubrió las calles del pueblo entero. Desde entonces, cada 21 de septiembre, regalar flores amarillas se convirtió en una forma de decir lo que a veces las palabras no alcanzan: que alguien importa, que alguien se quiere, que alguien se elige.</p>
+    <p>En Macondo llovieron flores por una despedida. Aquí, hoy, florecen por lo contrario: por seguir eligiéndote, por seguir aquí.</p>
+  </section>
+
+  <section class="dedication">
+    <div class="eyebrow">La dedicatoria</div>
+    <div class="to">Para ti, Cam</div>
+    <p>Si hoy te cayera encima una lluvia de flores amarillas, sería porque el mundo también se dio cuenta de lo que yo ya sabía: que contigo todo pesa menos, que las conversaciones contigo no se acaban aunque se acabe el tema, que tu risa tiene ese efecto raro de hacer que un día cualquiera deje de serlo.</p>
+    <p>No necesito que caiga nada del cielo para decírtelo, pero hoy es un buen día para hacerlo de todos modos: me gusta quererte. Me gusta elegirte, sin ceremonia, un día común convertido en el día de las flores amarillas.</p>
+    <p class="signoff">Feliz día de las flores amarillas, Cam.</p>
+  </section>
+
+  <section class="closing">
+    <div class="final" id="finalMessage">te quiero, Cam.<br>hoy y en cualquier otro 21 de septiembre.</div>
+    <div class="stamp">macondo &middot; 21.09</div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var GOAL = 21;
+
+  /* ---------------- audio: tiny synthesized pop, no external files ---------------- */
+  var actx = null;
+  function pop(freq){
+    try{
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      var o = actx.createOscillator();
+      var g = actx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq, actx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(freq*1.6, actx.currentTime + 0.09);
+      g.gain.setValueAtTime(0.0001, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.16, actx.currentTime + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.22);
+      o.connect(g); g.connect(actx.destination);
+      o.start(); o.stop(actx.currentTime + 0.24);
+    }catch(e){ /* audio not available — silently skip */ }
+  }
+
+  /* ---------------- flower head sprite (petals + textured center) ---------------- */
+  function randomDots(n){
+    var dots = [];
+    for (var i=0;i<n;i++){
+      var a = Math.random()*Math.PI*2;
+      var r = Math.sqrt(Math.random())*0.7;
+      dots.push({ x: Math.cos(a)*r, y: Math.sin(a)*r });
+    }
+    return dots;
+  }
+
+  function drawBloom(ctx, x, y, r, rot, wobble){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot + wobble);
+    var petalCount = 13;
+    for (var i=0;i<petalCount;i++){
+      var a = (i/petalCount)*Math.PI*2;
+      ctx.save();
+      ctx.rotate(a);
+      ctx.fillStyle = i%2===0 ? '#f2b705' : '#f7c722';
+      ctx.beginPath();
+      ctx.ellipse(0, -r*1.3, r*0.38, r*0.62, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+    var grad = ctx.createRadialGradient(0,0,r*0.08,0,0,r*0.82);
+    grad.addColorStop(0, '#8a5a2e');
+    grad.addColorStop(1, '#5c3a1e');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0,0,r*0.82,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  /* ---------------- game canvas ---------------- */
+  var section = document.getElementById('gameSection');
+  var canvas = document.getElementById('gameCanvas');
+  var ctx = canvas.getContext('2d');
+  var hud = document.getElementById('hud');
+  var scoreNum = document.getElementById('scoreNum');
+  var panelStart = document.getElementById('panelStart');
+  var panelWon = document.getElementById('panelWon');
+  var startBtn = document.getElementById('startBtn');
+  var skipBtn = document.getElementById('skipBtn');
+  var openLetterBtn = document.getElementById('openLetterBtn');
+  var finalMessage = document.getElementById('finalMessage');
+
+  var W, H, DPR;
+  var stars = [];
+  var blooms = [];
+  var particles = [];
+  var score = 0;
+  var state = 'idle'; // idle | playing | won
+  var spawnAcc = 0;
+  var lastT = 0;
+
+  var reasons = [
+    'por tu sonrisa', 'por cómo ves el mundo', 'por cada mensaje tuyo',
+    'por lo fácil que es quererte', 'por tu forma de escuchar',
+    'por todo lo que aún no vivimos', 'por elegirte cada día',
+    'por ser exactamente tú', 'por quedarte', 'por hoy', 'por nosotros'
+  ];
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = section.clientWidth;
+    H = section.clientHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    if (stars.length === 0){
+      var n = W < 500 ? 60 : 90;
+      for (var i=0;i<n;i++){
+        stars.push({ x: Math.random()*W, y: Math.random()*H*0.7, r: Math.random()*1.4+0.3, phase: Math.random()*Math.PI*2, speed: 0.6+Math.random()*1.2 });
+      }
+    }
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function drawSky(t){
+    // sun glow near horizon
+    var glowY = H*0.42;
+    var g = ctx.createRadialGradient(W/2, glowY, 10, W/2, glowY, 180);
+    g.addColorStop(0, 'rgba(242,183,5,0.5)');
+    g.addColorStop(0.5, 'rgba(242,183,5,0.1)');
+    g.addColorStop(1, 'rgba(242,183,5,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+
+    for (var i=0;i<stars.length;i++){
+      var s = stars[i];
+      var a = 0.35 + Math.sin(t*0.001*s.speed + s.phase)*0.3 + 0.3;
+      ctx.globalAlpha = Math.max(0, Math.min(1,a));
+      ctx.fillStyle = '#fff8e6';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function spawnBloom(){
+    var r = W < 500 ? (20 + Math.random()*10) : (24 + Math.random()*12);
+    blooms.push({
+      x: 30 + Math.random()*(W-60),
+      y: H + r,
+      r: r,
+      vy: 0.55 + Math.random()*0.45,
+      drift: (Math.random()-0.5)*0.4,
+      swayPhase: Math.random()*Math.PI*2,
+      rot: Math.random()*Math.PI*2,
+      rotSpeed: (Math.random()-0.5)*0.01,
+      caught: false,
+      bornAt: performance.now()
+    });
+  }
+
+  function burst(x, y){
+    for (var i=0;i<10;i++){
+      var a = Math.random()*Math.PI*2;
+      var sp = 1 + Math.random()*2.2;
+      particles.push({
+        x:x, y:y,
+        vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
+        life: 1,
+        color: Math.random() < 0.5 ? '#f2b705' : '#ffd873'
+      });
+    }
+  }
+
+  function showToastAt(x, y, text){
+    var el = document.createElement('div');
+    el.className = 'catch-toast';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.textContent = text;
+    section.appendChild(el);
+    setTimeout(function(){ el.remove(); }, 1200);
+  }
+
+  function catchAt(clientX, clientY){
+    if (state !== 'playing') return;
+    var rect = canvas.getBoundingClientRect();
+    var x = clientX - rect.left;
+    var y = clientY - rect.top;
+    var best = null, bestDist = Infinity;
+    for (var i=0;i<blooms.length;i++){
+      var b = blooms[i];
+      if (b.caught) continue;
+      var d = Math.hypot(b.x-x, b.y-y);
+      var tolerance = b.r * 1.7;
+      if (d < tolerance && d < bestDist){ best = b; bestDist = d; }
+    }
+    if (best){
+      best.caught = true;
+      score++;
+      scoreNum.textContent = String(score);
+      burst(best.x, best.y);
+      showToastAt(best.x, best.y - best.r, reasons[(score-1) % reasons.length]);
+      pop(420 + Math.random()*140);
+      if (score >= GOAL){ finishGame(); }
+    }
+  }
+
+  canvas.addEventListener('pointerdown', function(e){ catchAt(e.clientX, e.clientY); });
+
+  function tick(t){
+    if (!lastT) lastT = t;
+    var dt = t - lastT;
+    lastT = t;
+
+    ctx.clearRect(0,0,W,H);
+    drawSky(t);
+
+    if (state === 'playing'){
+      spawnAcc += dt;
+      var interval = Math.max(420, 900 - score*18);
+      if (spawnAcc > interval){
+        spawnAcc = 0;
+        spawnBloom();
+      }
+    }
+
+    for (var i=blooms.length-1;i>=0;i--){
+      var b = blooms[i];
+      if (b.caught){ blooms.splice(i,1); continue; }
+      b.y -= b.vy * (dt/16.7);
+      b.x += b.drift + Math.sin(t*0.002 + b.swayPhase)*0.4;
+      b.rot += b.rotSpeed;
+      if (b.y < -b.r*2){ blooms.splice(i,1); continue; }
+      var age = (t - b.bornAt)/1000;
+      var wobble = Math.sin(t*0.004 + b.swayPhase)*0.15;
+      drawBloom(ctx, b.x, b.y, b.r, b.rot, wobble);
+    }
+
+    for (var j=particles.length-1;j>=0;j--){
+      var p = particles[j];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.life -= 0.035;
+      if (p.life <= 0){ particles.splice(j,1); continue; }
+      ctx.globalAlpha = Math.max(0,p.life);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  function startGame(){
+    state = 'playing';
+    score = 0;
+    scoreNum.textContent = '0';
+    blooms = []; particles = [];
+    panelStart.hidden = true;
+    hud.classList.add('show');
+  }
+
+  function finishGame(){
+    state = 'won';
+    setTimeout(function(){
+      panelWon.hidden = false;
+    }, 500);
+  }
+
+  function goToLetter(){
+    document.querySelector('.story').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  startBtn.addEventListener('click', startGame);
+  skipBtn.addEventListener('click', goToLetter);
+  openLetterBtn.addEventListener('click', goToLetter);
+
+  /* reveal final closing message when scrolled into view */
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          setTimeout(function(){ finalMessage.classList.add('show'); }, 500);
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.6 });
+    io.observe(document.querySelector('.closing'));
+  }
+
+  /* ---------------- ambient falling petals across the page ---------------- */
+  var pcanvas = document.getElementById('petal-canvas');
+  var pctx = pcanvas.getContext('2d');
+  var petals = [];
+  var PW, PH, PDPR;
+
+  function presize(){
+    PDPR = Math.min(window.devicePixelRatio || 1, 2);
+    PW = window.innerWidth; PH = window.innerHeight;
+    pcanvas.width = PW*PDPR; pcanvas.height = PH*PDPR;
+    pctx.setTransform(PDPR,0,0,PDPR,0,0);
+  }
+  presize();
+  window.addEventListener('resize', presize);
+
+  function makePetal(){
+    return {
+      x: Math.random()*PW, y: -20 - Math.random()*PH,
+      size: 5 + Math.random()*6, speed: 0.28 + Math.random()*0.4,
+      drift: (Math.random()-0.5)*0.6, rot: Math.random()*Math.PI*2,
+      rotSpeed: (Math.random()-0.5)*0.02, sway: Math.random()*Math.PI*2,
+      opacity: 0.35 + Math.random()*0.3,
+      color: Math.random() < 0.6 ? '#f2b705' : '#ffd873'
+    };
+  }
+  var pCount = reduceMotion ? 0 : (PW < 500 ? 12 : 18);
+  for (var i=0;i<pCount;i++){ petals.push(makePetal()); }
+
+  function ptick(){
+    pctx.clearRect(0,0,PW,PH);
+    for (var i=0;i<petals.length;i++){
+      var p = petals[i];
+      p.sway += 0.02; p.y += p.speed; p.x += p.drift + Math.sin(p.sway)*0.3; p.rot += p.rotSpeed;
+      if (p.y > PH+20){ p.y=-20; p.x = Math.random()*PW; }
+      pctx.save();
+      pctx.translate(p.x,p.y); pctx.rotate(p.rot); pctx.globalAlpha=p.opacity;
+      pctx.fillStyle=p.color; pctx.beginPath();
+      pctx.ellipse(0,0,p.size*0.55,p.size,0,0,Math.PI*2); pctx.fill();
+      pctx.restore();
+    }
+    if (!reduceMotion){ requestAnimationFrame(ptick); }
+  }
+  if (!reduceMotion){ requestAnimationFrame(ptick); }
+})();
+</script>

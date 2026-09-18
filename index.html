@@ -2,9 +2,80 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=Un%20Universo%20para%20ella.html">
-<title>Redirigiendo...</title>
-<script>location.replace("Un%20Universo%20para%20ella.html");</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Feliz día de las flores amarillas</title>
+<meta name="description" content="Un ramo virtual de girasoles y mariposas, una carta animada y romántica.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
-<body></body>
+<body>
+
+  <!-- Pantalla de bienvenida -->
+  <section id="welcome-screen" class="welcome" aria-label="Pantalla de bienvenida">
+    <div class="welcome__glow" aria-hidden="true"></div>
+    <p class="welcome__eyebrow">un pequeño regalo para ti</p>
+    <h1 class="welcome__title">Feliz día de las<br>flores amarillas</h1>
+    <button id="gift-btn" class="gift-btn" type="button">
+      Abrir mi regalo <span aria-hidden="true">💛</span>
+    </button>
+  </section>
+
+  <!-- Escena principal -->
+  <main id="scene" class="scene" aria-label="Escena romántica animada" hidden>
+
+    <!-- Fondo nocturno con luces suaves -->
+    <div class="scene__backdrop" aria-hidden="true"></div>
+    <div class="scene__glow-overlay" id="glow-overlay" aria-hidden="true"></div>
+    <div class="scene__vignette" aria-hidden="true"></div>
+
+    <!-- Partículas doradas (canvas) -->
+    <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+
+    <!-- Capa de mariposas (posicionadas dinámicamente por JS) -->
+    <div id="butterfly-layer" class="butterfly-layer" aria-hidden="true"></div>
+
+    <!-- Textos principales -->
+    <header id="main-text" class="main-text">
+      <h1 id="headline" class="headline">Feliz día de las flores amarillas</h1>
+      <p id="subheadline" class="subheadline">Ten tu ramo bonito</p>
+    </header>
+
+    <!-- Ramo de girasoles -->
+    <div id="bouquet" class="bouquet" aria-label="Ramo de girasoles envuelto en papel de regalo">
+      <div id="sunflower-holder" class="sunflower-holder"></div>
+      <div id="paper-wrap" class="paper-wrap">
+        <span class="paper-fold paper-fold--1"></span>
+        <span class="paper-fold paper-fold--2"></span>
+        <span class="paper-fold paper-fold--3"></span>
+      </div>
+    </div>
+
+    <!-- Mensajes románticos (posicionados dinámicamente por JS) -->
+    <div id="messages-layer" class="messages-layer" aria-hidden="true"></div>
+
+    <!-- Controles discretos -->
+    <div class="controls">
+      <button id="sound-btn" class="icon-btn" type="button" aria-pressed="false" title="Activar música">
+        <svg viewBox="0 0 24 24" class="icon-btn__icon" aria-hidden="true">
+          <path class="icon-speaker" d="M4 9v6h4l5 5V4L8 9H4z"></path>
+          <path class="icon-mute-line" d="M2 2L22 22" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"></path>
+          <path class="icon-wave icon-wave--1" d="M16.5 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"></path>
+          <path class="icon-wave icon-wave--2" d="M19 6a9 9 0 0 1 0 12" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"></path>
+        </svg>
+      </button>
+      <button id="restart-btn" class="icon-btn icon-btn--ghost" type="button" title="Reiniciar animación">
+        <svg viewBox="0 0 24 24" class="icon-btn__icon" aria-hidden="true">
+          <path d="M4 12a8 8 0 1 1 3 6.2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"></path>
+          <path d="M4 18v-5h5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+    </div>
+
+    <audio id="bg-music" src="assets/music.mp3" loop preload="none"></audio>
+  </main>
+
+  <script src="script.js"></script>
+</body>
 </html>
